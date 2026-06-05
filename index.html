@@ -1,0 +1,941 @@
+import os
+
+# Define the complete HTML website code with everything embedded
+html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13 Years, One Friendship</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Caveat:wght@700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --navy: #0A1128;
+            --black: #02040A;
+            --gold: #D4AF37;
+            --gold-light: #F3E5AB;
+            --white: #FAFAFA;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--black);
+            color: var(--white);
+            overflow-x: hidden;
+        }
+
+        .cinzel-title {
+            font-family: 'Cinzel', serif;
+        }
+
+        .handwritten {
+            font-family: 'Caveat', cursive;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--black);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1E293B;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+
+        /* Ambient Glow Objects */
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 1;
+            transition: all 1s ease;
+        }
+
+        /* Timeline connector line */
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            left: 16px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, rgba(212, 175, 55, 0.4) 15%, rgba(212, 175, 55, 0.4) 85%, transparent);
+        }
+        @media (min-width: 768px) {
+            .timeline-line::before {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Polaroid layout properties */
+        .polaroid {
+            background: white;
+            padding: 12px 12px 24px 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transform: rotate(var(--r));
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: #222;
+        }
+        .polaroid:hover {
+            transform: scale(1.08) rotate(0deg) translateY(-10px);
+            box-shadow: 0 20px 35px rgba(212, 175, 55, 0.25);
+            z-index: 50;
+        }
+
+        /* Shake Animation for the sneeze reunion */
+        @keyframes sneeze-shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(-5px, -5px) rotate(-1deg); }
+            20% { transform: translate(5px, 5px) rotate(1deg); }
+            30% { transform: translate(-5px, 5px) rotate(-1deg); }
+            40% { transform: translate(5px, -5px) rotate(1deg); }
+            50% { transform: translate(-3px, -3px) rotate(0deg); }
+            60% { transform: translate(3px, 3px) rotate(1deg); }
+            70% { transform: translate(-3px, 5px) rotate(-1deg); }
+            80% { transform: translate(5px, -3px) rotate(1deg); }
+            90% { transform: translate(-2px, 2px) rotate(0deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        .shake-active {
+            animation: sneeze-shake 0.6s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-[#02040A] text-gray-100 antialiased selection:bg-[#D4AF37] selection:text-black">
+
+    <!-- Interactive Starfield Canvas -->
+    <canvas id="starfield" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- Audio Player Ambient Widget -->
+    <div class="fixed top-4 right-4 z-50 bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-3 shadow-lg">
+        <span class="text-xs text-gray-400 font-mono tracking-widest uppercase" id="track-status">Sound Ambient</span>
+        <button id="bg-music-toggle" class="w-8 h-8 rounded-full bg-[#D4AF37] text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+            <i class="fa-solid fa-play" id="music-icon"></i>
+        </button>
+    </div>
+
+    <!-- Background Ambient Glows -->
+    <div class="glow-orb w-[400px] h-[400px] bg-blue-900 top-20 left-[-100px]"></div>
+    <div class="glow-orb w-[500px] h-[500px] bg-amber-900/40 bottom-40 right-[-150px]"></div>
+
+    <!-- MAIN COMPONENT WRAPPER -->
+    <main class="relative z-10 w-full max-w-5xl mx-auto px-4 py-8">
+
+        <!-- HEADER HERO SECTION -->
+        <header class="min-h-[85vh] flex flex-col justify-center items-center text-center relative py-12">
+            <div class="space-y-3 mb-6">
+                <span class="text-[#D4AF37] tracking-[0.4em] text-xs font-mono uppercase block animate-pulse">A Cinematic Celebration</span>
+                <h2 class="cinzel-title text-2xl sm:text-3xl text-gray-400 font-light tracking-wide">"13 Years, One Friendship"</h2>
+            </div>
+
+            <h1 class="cinzel-title text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight bg-gradient-to-b from-white via-gray-200 to-gray-500 bg-clip-text text-transparent my-4">
+                Happy 19th Birthday,<br><span class="text-transparent bg-gradient-to-r from-[#D4AF37] via-[#F3E5AB] to-[#D4AF37] bg-clip-text">Abhi</span>
+            </h1>
+
+            <p class="text-gray-400 max-w-lg italic font-light tracking-wide text-sm sm:text-base px-6 mt-2 leading-relaxed">
+                "Some friendships happen by chance.<br>Some become family by choice."
+            </p>
+
+            <!-- Countdown Timer Container -->
+            <div class="mt-12 bg-white/[0.02] backdrop-blur-sm border border-white/10 rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+                <p class="text-xs font-mono tracking-widest text-[#D4AF37] uppercase mb-4">Countdown to June 6</p>
+                <div class="grid grid-cols-4 gap-2 text-center" id="countdown-clock">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <span class="block text-2xl sm:text-3xl font-bold tracking-tight font-mono text-white" id="cd-days">00</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Days</span>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <span class="block text-2xl sm:text-3xl font-bold tracking-tight font-mono text-white" id="cd-hours">00</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Hours</span>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <span class="block text-2xl sm:text-3xl font-bold tracking-tight font-mono text-white" id="cd-mins">00</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Mins</span>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <span class="block text-2xl sm:text-3xl font-bold tracking-tight font-mono text-white" id="cd-secs">00</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Secs</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scroll indicator arrow element -->
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce text-gray-600">
+                <i class="fa-solid fa-chevron-down text-lg"></i>
+            </div>
+        </header>
+
+        <!-- SECTION 1: MEET ABHI PROFILE COMPONENT -->
+        <section class="py-16 border-t border-white/5">
+            <div class="bg-gradient-to-br from-[#0A1128]/80 to-black p-6 sm:p-10 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                    <!-- Photo side -->
+                    <div class="md:col-span-5 flex justify-center">
+                        <div class="relative group">
+                            <div class="absolute inset-0 bg-[#D4AF37]/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+                            <img src="IMG-20260222-WA0115.jpg" alt="Abhi Nav Sai Beach Selfie" class="w-64 h-64 object-cover rounded-2xl border-2 border-[#D4AF37]/60 shadow-2xl relative z-10 transition-transform duration-500 group-hover:scale-[1.02]">
+                            <span class="absolute bottom-3 right-3 z-20 bg-black/70 text-white text-[10px] px-2 py-1 rounded font-mono border border-white/10">
+                                <i class="fa-solid fa-camera-retro mr-1 text-[#D4AF37]"></i> Beach Selfie
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Stats / Details Side -->
+                    <div class="md:col-span-7 space-y-6">
+                        <div>
+                            <span class="text-xs font-mono tracking-widest text-[#D4AF37] uppercase block mb-1">The Birthday Brother</span>
+                            <h2 class="cinzel-title text-3xl font-bold text-white tracking-wide">Meet Abhi Nav Sai</h2>
+                        </div>
+                        <p class="text-gray-300 font-light leading-relaxed text-sm sm:text-base">
+                            "Not just a friend. A brother, a supporter, a constant presence in every important chapter of my life."
+                        </p>
+                        <div class="grid grid-cols-2 gap-4 pt-2">
+                            <div class="bg-black/30 p-3 rounded-xl border border-white/5">
+                                <span class="text-[10px] font-mono text-gray-500 uppercase block">Full Name</span>
+                                <span class="text-sm font-medium text-gray-200">Abhi Nav Sai</span>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-xl border border-white/5">
+                                <span class="text-[10px] font-mono text-gray-500 uppercase block">Nickname</span>
+                                <span class="text-sm font-medium text-gray-200">Abhi</span>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-xl border border-white/5">
+                                <span class="text-[10px] font-mono text-gray-500 uppercase block">Date of Birth</span>
+                                <span class="text-sm font-medium text-gray-200">June 6, 2007</span>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-xl border border-white/5">
+                                <span class="text-[10px] font-mono text-gray-500 uppercase block">Zodiac Sign</span>
+                                <span class="text-sm font-medium text-gray-200"><i class="fa-solid fa-gemini text-amber-400 mr-1"></i> Gemini</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TIMELINE INTRODUCTION BLOCK HEADER -->
+        <div class="text-center pt-16 pb-8">
+            <span class="text-xs font-mono tracking-widest text-[#D4AF37] uppercase">The Story Chronicles</span>
+            <h2 class="cinzel-title text-3xl font-bold text-white mt-1">Through The Chapters of Time</h2>
+        </div>
+
+        <!-- THE MAIN TIMELINE COMPONENT BLOCK CONTAINER -->
+        <section class="relative timeline-line pl-8 pr-2 md:px-0 py-12 space-y-16">
+            
+            <!-- SECTION 2: THE BEGINNING (4TH CLASS) -->
+            <div class="relative grid grid-cols-1 md:grid-cols-12 items-center">
+                <!-- Node indicator -->
+                <div class="absolute left-[-24px] md:left-1/2 md:-translate-x-1/2 w-4 h-4 rounded-full bg-black border-2 border-[#D4AF37] z-20 flex items-center justify-center">
+                    <div class="w-1.5 h-1.5 bg-[#D4AF37] rounded-full"></div>
+                </div>
+                <!-- Card Container alignment logic mapping -->
+                <div class="md:col-span-5 md:text-right space-y-3">
+                    <span class="text-xs font-mono text-[#D4AF37] tracking-wider block">Chapter I &bull; 4th Class Genesis</span>
+                    <h3 class="cinzel-title text-xl font-bold text-white">The Day We Met</h3>
+                    <p class="text-gray-400 text-sm font-light leading-relaxed">
+                        We first met in 4th class through a mutual friend. None of us knew then that this simple introduction would become one of the most important friendships of our lives.
+                    </p>
+                </div>
+                <div class="hidden md:block md:col-span-2"></div>
+                <!-- Asset side -->
+                <div class="md:col-span-5 mt-4 md:mt-0">
+                    <div class="bg-white/[0.02] border border-white/10 p-2 rounded-2xl shadow-xl max-w-sm">
+                        <img src="IMG-20250626-WA0101.jpg" alt="5th Shaurya Classroom Photo" class="w-full h-48 object-cover rounded-xl grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                        <p class="text-[10px] font-mono text-gray-500 p-2 text-center">Classroom Memory Vault &bull; Early Origins</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: THE FIGHT (10TH CLASS SILENCE) -->
+            <div class="relative grid grid-cols-1 md:grid-cols-12 items-center">
+                <!-- Node indicator -->
+                <div class="absolute left-[-24px] md:left-1/2 md:-translate-x-1/2 w-4 h-4 rounded-full bg-black border-2 border-red-500 z-20 flex items-center justify-center">
+                    <div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                </div>
+                <!-- Asset side (Left side for symmetry on desktops) -->
+                <div class="hidden md:block md:col-span-5 text-right">
+                    <div class="bg-white/[0.02] border border-white/10 p-2 rounded-2xl shadow-xl max-w-sm ml-auto">
+                        <img src="IMG-20250626-WA0105.jpg" alt="School Uniform Uniform Era" class="w-full h-48 object-cover rounded-xl filter grayscale transition-all duration-700 hover:filter-none">
+                        <p class="text-[10px] font-mono text-gray-500 p-2 text-center">The Cold Winter &bull; Hover to heal silence</p>
+                    </div>
+                </div>
+                <div class="hidden md:block md:col-span-2"></div>
+                <!-- Card Container alignment logic mapping -->
+                <div class="md:col-span-5 space-y-3">
+                    <span class="text-xs font-mono text-red-400 tracking-wider block">Chapter II &bull; 10th Class Turbulence</span>
+                    <h3 class="cinzel-title text-xl font-bold text-white">The Three-Month Silence</h3>
+                    <p class="text-gray-400 text-sm font-light leading-relaxed">
+                        In 10th class, we had a fight and barely spoke for almost three months. It felt strange because we were used to being around each other every day.
+                    </p>
+                    <!-- Mobile block image display mirror option fallback -->
+                    <div class="block md:hidden mt-3 bg-white/[0.02] border border-white/10 p-2 rounded-2xl shadow-xl">
+                        <img src="IMG-20250626-WA0105.jpg" alt="School Uniform Uniform Era" class="w-full h-48 object-cover rounded-xl grayscale">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: THE FUNNIEST REUNION (THE SNEEZE THAT FIXED EVERYTHING) -->
+            <div id="sneeze-section" class="relative grid grid-cols-1 md:grid-cols-12 items-center rounded-2xl transition-all duration-300 p-2">
+                <!-- Node indicator -->
+                <div class="absolute left-[-24px] md:left-1/2 md:-translate-x-1/2 w-4 h-4 rounded-full bg-black border-2 border-green-400 z-20 flex items-center justify-center">
+                    <div class="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                </div>
+                <!-- Card Container alignment logic mapping -->
+                <div class="md:col-span-5 md:text-right space-y-3">
+                    <span class="text-xs font-mono text-green-400 tracking-wider block">Chapter III &bull; The Sudden Dynamic Break</span>
+                    <h3 class="cinzel-title text-xl font-bold text-white">The Sneeze That Fixed Everything</h3>
+                    <p class="text-gray-400 text-sm font-light leading-relaxed">
+                        When I finally gathered the courage to speak to him again, I was extremely nervous. At that exact moment, I sneezed and embarrassed myself completely. Instead of making things awkward, it made him laugh. That laugh ended three months of silence and brought our friendship back stronger than before.
+                    </p>
+                    <!-- Sneeze Interactive Trigger Mechanism CTA Widget button -->
+                    <div class="pt-2">
+                        <button id="sneeze-trigger-btn" class="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 text-white font-mono text-xs px-4 py-2.5 rounded-full shadow-lg active:scale-95 transition-all cursor-pointer">
+                            <i class="fa-solid fa-wind animate-pulse"></i> Trigger Sneeze Simulation
+                        </button>
+                    </div>
+                </div>
+                <div class="hidden md:block md:col-span-2"></div>
+                <!-- Asset side -->
+                <div class="md:col-span-5 mt-4 md:mt-0">
+                    <div class="bg-white/[0.02] border border-white/10 p-2 rounded-2xl shadow-xl max-w-sm">
+                        <img src="IMG-20250626-WA0096.jpg" alt="Hallway Smiles Reunion Era" class="w-full h-48 object-cover rounded-xl shadow-inner">
+                        <p class="text-[10px] font-mono text-gray-500 p-2 text-center">Smiles Regained Post-Laughter Burst</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: THE LEGENDARY PRANK -->
+            <div class="relative grid grid-cols-1 md:grid-cols-12 items-center">
+                <!-- Node indicator -->
+                <div class="absolute left-[-24px] md:left-1/2 md:-translate-x-1/2 w-4 h-4 rounded-full bg-black border-2 border-amber-500 z-20 flex items-center justify-center">
+                    <div class="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
+                </div>
+                <!-- Asset side (Left for zig-zag arrangement parity) -->
+                <div class="hidden md:block md:col-span-5 text-right">
+                    <div class="bg-white/[0.02] border border-white/10 p-2 rounded-2xl shadow-xl max-w-sm ml-auto">
+                        <img src="IMG-20250626-WA0148.jpg" alt="Farewell Day Green Chalkboard Pose" class="w-full h-48 object-cover rounded-xl">
+                        <p class="text-[10px] font-mono text-gray-500 p-2 text-center">The Climax of School Life Days</p>
+                    </div>
+                </div>
+                <div class="hidden md:block md:col-span-2"></div>
+                <!-- Card Container alignment logic mapping -->
+                <div class="md:col-span-5 space-y-3">
+                    <span class="text-xs font-mono text-amber-400 tracking-wider block">Chapter IV &bull; Farewell Day Chaos</span>
+                    <h3 class="cinzel-title text-xl font-bold text-white">The Last Day of School</h3>
+                    <p class="text-gray-400 text-sm font-light leading-relaxed">
+                        On the last day of school, we pulled several pranks on Abhi and even linked him with a girl just to tease him. Years later, it remains one of the funniest memories from our school life.
+                    </p>
+                    <div class="block md:hidden mt-3 bg-white/[0.02] border border-white/10 p-2 rounded-2xl shadow-xl">
+                        <img src="IMG-20250626-WA0148.jpg" alt="Farewell Day Green Chalkboard Pose" class="w-full h-48 object-cover rounded-xl">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 7: THE SEPARATION (DIFFERENT ROADS) -->
+            <div class="relative grid grid-cols-1 md:grid-cols-12 items-center">
+                <!-- Node indicator -->
+                <div class="absolute left-[-24px] md:left-1/2 md:-translate-x-1/2 w-4 h-4 rounded-full bg-black border-2 border-purple-500 z-20 flex items-center justify-center">
+                    <div class="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                </div>
+                <!-- Card Container alignment logic mapping -->
+                <div class="md:col-span-5 md:text-right space-y-3">
+                    <span class="text-xs font-mono text-purple-400 tracking-wider block">Chapter V &bull; The Bifurcation</span>
+                    <h3 class="cinzel-title text-xl font-bold text-white">Different Roads</h3>
+                    <p class="text-gray-400 text-sm font-light leading-relaxed">
+                        After school, we planned to continue our studies together. But because I changed my decision at the last moment, we ended up joining different colleges. For almost two years, life pushed us onto different paths.
+                    </p>
+                </div>
+                <div class="hidden md:block md:col-span-2"></div>
+                <!-- Asset side -->
+                <div class="md:col-span-5 mt-4 md:mt-0">
+                    <div class="bg-white/[0.02] border border-white/10 p-2 rounded-2xl shadow-xl max-w-sm">
+                        <img src="IMG-20250626-WA0113.jpg" alt="Avengers Wall Mural Group Photo" class="w-full h-48 object-cover rounded-xl opacity-60 filter saturate-50">
+                        <p class="text-[10px] font-mono text-gray-500 p-2 text-center">Avengers Mural &bull; Split Paths Ahead</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 8: THE REUNION (PICKING UP WHERE WE LEFT OFF) -->
+            <div class="relative grid grid-cols-1 md:grid-cols-12 items-center">
+                <!-- Node indicator -->
+                <div class="absolute left-[-24px] md:left-1/2 md:-translate-x-1/2 w-4 h-4 rounded-full bg-black border-2 border-[#D4AF37] z-20 flex items-center justify-center">
+                    <div class="w-1.5 h-1.5 bg-[#D4AF37] rounded-full"></div>
+                </div>
+                <!-- Asset side -->
+                <div class="hidden md:block md:col-span-5 text-right">
+                    <div class="grid grid-cols-2 gap-2 max-w-sm ml-auto">
+                        <img src="IMG-20250626-WA0086.jpg" alt="Burger King Feast" class="w-full h-32 object-cover rounded-xl border border-white/5">
+                        <img src="IMG-20250626-WA0098.jpg" alt="Reunion Portrait Close Up" class="w-full h-32 object-cover rounded-xl border border-white/5">
+                    </div>
+                    <p class="text-[10px] font-mono text-[#D4AF37] mt-2 tracking-wider">Burger King & Beach Revival Core</p>
+                </div>
+                <div class="hidden md:block md:col-span-2"></div>
+                <!-- Card Container alignment logic mapping -->
+                <div class="md:col-span-5 space-y-3">
+                    <span class="text-xs font-mono text-[#D4AF37] tracking-wider block">Chapter VI &bull; The Full Circle Brotherhood</span>
+                    <h3 class="cinzel-title text-xl font-bold text-white">Picking Up Where We Left Off</h3>
+                    <p class="text-gray-400 text-sm font-light leading-relaxed">
+                        After a long gap, we met again. We went to Burger King, spent time together, visited the beach, watched a movie, ate biryani, and talked with our old friends. It felt like no time had passed.
+                    </p>
+                    <!-- Mobile display fallback grids layout configuration -->
+                    <div class="grid grid-cols-2 gap-2 md:hidden mt-3">
+                        <img src="IMG-20250626-WA0086.jpg" alt="Burger King" class="w-full h-24 object-cover rounded-xl">
+                        <img src="IMG-20250626-WA0098.jpg" alt="Beach Reunion" class="w-full h-24 object-cover rounded-xl">
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SECTION 5: SCHOOL MEMORIES INTERACTIVE SLIDER/CARDS -->
+        <section class="py-16 border-t border-white/5">
+            <div class="text-center mb-10">
+                <span class="text-xs font-mono tracking-widest text-[#D4AF37] uppercase">Daily Archives</span>
+                <h2 class="cinzel-title text-2xl sm:text-3xl font-bold text-white mt-1">Ordinary Days, Priceless Echoes</h2>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div class="bg-gradient-to-b from-white/[0.03] to-transparent p-6 rounded-2xl border border-white/5 hover:border-[#D4AF37]/30 transition-all group">
+                    <div class="w-10 h-10 rounded-full bg-blue-950/50 flex items-center justify-center text-[#D4AF37] mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-box-tissue"></i>
+                    </div>
+                    <h4 class="font-medium text-white mb-2">Sharing Lunch Together</h4>
+                    <p class="text-xs text-gray-400 font-light leading-relaxed">The immediate mid-day bell chaos, raiding lunch boxes before the teacher leaves, and fighting over the last spoonful.</p>
+                </div>
+                <div class="bg-gradient-to-b from-white/[0.03] to-transparent p-6 rounded-2xl border border-white/5 hover:border-[#D4AF37]/30 transition-all group">
+                    <div class="w-10 h-10 rounded-full bg-blue-950/50 flex items-center justify-center text-[#D4AF37] mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+                    <h4 class="font-medium text-white mb-2">Long School Debriefs</h4>
+                    <p class="text-xs text-gray-400 font-light leading-relaxed">Walking at a snail's pace outside the school gates just to stretch out conversations about anime, movies, or trivial things.</p>
+                </div>
+                <div class="bg-gradient-to-b from-white/[0.03] to-transparent p-6 rounded-2xl border border-white/5 hover:border-[#D4AF37]/30 transition-all group">
+                    <div class="w-10 h-10 rounded-full bg-blue-950/50 flex items-center justify-center text-[#D4AF37] mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-bicycle"></i>
+                    </div>
+                    <h4 class="font-medium text-white mb-2">Cycling Side-by-Side</h4>
+                    <p class="text-xs text-gray-400 font-light leading-relaxed">Racing through busy evening streets, navigating traffic shortcuts together, and never caring about heading home late.</p>
+                </div>
+                <div class="bg-gradient-to-b from-white/[0.03] to-transparent p-6 rounded-2xl border border-white/5 hover:border-[#D4AF37]/30 transition-all group">
+                    <div class="w-10 h-10 rounded-full bg-blue-950/50 flex items-center justify-center text-[#D4AF37] mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-masks-theater"></i>
+                    </div>
+                    <h4 class="font-medium text-white mb-2">Constant Inside Jokes</h4>
+                    <p class="text-xs text-gray-400 font-light leading-relaxed">Making completely straight-faced expressions to trigger an immediate, uncontrollable laughing fit in the middle of a strict class.</p>
+                </div>
+                <div class="bg-gradient-to-b from-white/[0.03] to-transparent p-6 rounded-2xl border border-white/5 hover:border-[#D4AF37]/30 transition-all group">
+                    <div class="w-10 h-10 rounded-full bg-blue-950/50 flex items-center justify-center text-[#D4AF37] mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-face-grin-tears"></i>
+                    </div>
+                    <h4 class="font-medium text-white mb-2">Roasting and Teasing</h4>
+                    <p class="text-xs text-gray-400 font-light leading-relaxed">A merciless cycle of targeted banter that would seem harsh to outsiders, but remains our purest form of absolute validation.</p>
+                </div>
+                <div class="bg-gradient-to-b from-white/[0.03] to-transparent p-6 rounded-2xl border border-white/5 hover:border-[#D4AF37]/30 transition-all group">
+                    <div class="w-10 h-10 rounded-full bg-blue-950/50 flex items-center justify-center text-[#D4AF37] mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-gem"></i>
+                    </div>
+                    <h4 class="font-medium text-white mb-2">Priceless Now</h4>
+                    <p class="text-xs text-gray-400 font-light leading-relaxed">Moments that felt perfectly ordinary back then, but have slowly turned into our most valuable emotional anchors today.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 9: WHY ABHI MATTERS DISPLAY MODULE -->
+        <section class="py-16 border-t border-white/5">
+            <div class="text-center mb-10">
+                <span class="text-xs font-mono tracking-widest text-[#D4AF37] uppercase">The Pillars</span>
+                <h2 class="cinzel-title text-2xl sm:text-3xl font-bold text-white mt-1">Why Abhi Matters To Me</h2>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="bg-[#0A1128]/40 border border-white/10 p-5 rounded-2xl text-center flex flex-col justify-center items-center shadow-lg hover:-translate-y-1 transition-transform">
+                    <div class="text-amber-400 text-xl mb-2"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                    <p class="text-sm font-medium text-gray-200">He stayed through my highs.</p>
+                </div>
+                <div class="bg-[#0A1128]/40 border border-white/10 p-5 rounded-2xl text-center flex flex-col justify-center items-center shadow-lg hover:-translate-y-1 transition-transform">
+                    <div class="text-blue-400 text-xl mb-2"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                    <p class="text-sm font-medium text-gray-200">He stayed through my lows.</p>
+                </div>
+                <div class="bg-[#0A1128]/40 border border-white/10 p-5 rounded-2xl text-center flex flex-col justify-center items-center shadow-lg hover:-translate-y-1 transition-transform">
+                    <div class="text-emerald-400 text-xl mb-2"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                    <p class="text-sm font-medium text-gray-200">He supported me unconditionally when I needed it.</p>
+                </div>
+                <div class="bg-[#0A1128]/40 border border-white/10 p-5 rounded-2xl text-center flex flex-col justify-center items-center shadow-lg hover:-translate-y-1 transition-transform">
+                    <div class="text-purple-400 text-xl mb-2"><i class="fa-solid fa-house-chimney-heart"></i></div>
+                    <p class="text-sm font-medium text-gray-200">He made school feel like home.</p>
+                </div>
+                <div class="bg-[#0A1128]/40 border border-white/10 p-5 rounded-2xl text-center flex flex-col justify-center items-center shadow-lg hover:-translate-y-1 transition-transform">
+                    <div class="text-[#D4AF37] text-xl mb-2"><i class="fa-solid fa-shield-halved"></i></div>
+                    <p class="text-sm font-medium text-gray-200">He became family.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 10: MEMORY GALLERY DIGITAL CORKBOARD PIN INTERACTION -->
+        <section class="py-16 border-t border-white/5 relative">
+            <div class="text-center mb-12">
+                <span class="text-xs font-mono tracking-widest text-[#D4AF37] uppercase">The Static Archives</span>
+                <h2 class="cinzel-title text-2xl sm:text-3xl font-bold text-white mt-1">The Digital Memory Board</h2>
+                <p class="text-xs text-gray-500 font-mono mt-2">Interactive Board &bull; Click to Inspect Card Detail View</p>
+            </div>
+
+            <!-- Polaroid Grid Layout wrapper element mapping all 10 inputs -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 justify-center items-center px-2 py-6 bg-amber-950/5 rounded-3xl border border-white/5">
+                
+                <!-- Pic 1 -->
+                <div class="flex justify-center" style="--r: -3deg;" onclick="openLightbox('IMG-20260222-WA0115.jpg', 'The Legendary Beach Selfie', 'Abhi taking a classic group selfie down at the sandy coastal rocks during our reunion.')">
+                    <div class="polaroid cursor-pointer">
+                        <img src="IMG-20260222-WA0115.jpg" class="w-full h-32 object-cover" alt="Memory">
+                        <div class="handwritten text-center text-xs mt-3 font-bold text-slate-800">Beach Selfie</div>
+                    </div>
+                </div>
+
+                <!-- Pic 2 -->
+                <div class="flex justify-center" style="--r: 4deg;" onclick="openLightbox('IMG-20250626-WA0148.jpg', 'Farewell Frame', 'Posing with our classmates right in front of the classroom chalkboard during the emotional final hours of high school.')">
+                    <div class="polaroid cursor-pointer">
+                        <img src="IMG-20250626-WA0148.jpg" class="w-full h-32 object-cover" alt="Memory">
+                        <div class="handwritten text-center text-xs mt-3 font-bold text-slate-800">The Squad Room</div>
+                    </div>
+                </div>
+
+                <!-- Pic 3 -->
+                <div class="flex justify-center" style="--r: -2deg;" onclick="openLightbox('IMG-20250626-WA0113.jpg', 'Avengers Assemblage', 'Standing tall in front of the colorful superhero wall art tracking back the legendary high school squad vibes.')">
+                    <div class="polaroid cursor-pointer">
+                        <img src="IMG-20250626-WA0113.jpg" class="w-full h-32 object-cover" alt="Memory">
+                        <div class="handwritten text-center text-xs mt-3 font-bold text-slate-800">Avengers Wall</div>
+                    </div>
+                </div>
+
+                <!-- Pic 4 -->
+                <div class="flex justify-center" style="--r: 5deg;" onclick="openLightbox('IMG-20250626-WA0123.jpg', 'Uniform Brotherhood', 'Bright orange shirt uniform days framing long walks home and constant evening roasts.')">
+                    <div class="polaroid cursor-pointer">
+                        <img src="IMG-20250626-WA0123.jpg" class="w-full h-32 object-cover" alt="Memory">
+                        <div class="handwritten text-center text-xs mt-3 font-bold text-slate-800">Orange Shirts</div>
+                    </div>
+                </div>
+
+                <!-- Pic 5 -->
+                <div class="flex justify-center" style="--r: -4deg;" onclick="openLightbox('IMG-20250626-WA0099.jpg', 'Class Blue Prints', 'A wide multi-angle crowded group picture packing in our massive collective childhood high school network.')">
+                    <div class="polaroid cursor-pointer">
+                        <img src="IMG-20250626-WA0099.jpg" class="w-full h-32 object-cover" alt="Memory">
+                        <div class="handwritten text-center text-xs mt-3 font-bold text-slate-800">Blue Shirts Core</div>
+                    </div>
+                </div>
+
+                <!-- Pic 6 -->
+                <div class="flex justify-center" style="--r: 3deg;" onclick="openLightbox('IMG-20250626-WA0101.jpg', '5th Shaurya Vault', 'A priceless elementary snapshot holding up memory paper certificates right inside the old classroom layout.')">
+                    <div class="polaroid cursor-pointer">
+                        <img src="IMG-20250626-WA0101.jpg" class="w-full h-32 object-cover" alt="Memory">
+                        <div class="handwritten text-center text-xs mt-3 font-bold text-slate-800">5th Shaurya</div>
+                    </div>
+                </div>
+
+                <!-- Pic 7 -->
+                <div class="flex justify-center" style="--r: -5deg;" onclick="openLightbox('IMG-20250626-WA0105.jpg', 'High School Thresholds', 'Standing in neat aligned vertical formation wearing light-blue school shirts right within our morning campus routine.')">
+                    <div class="polaroid cursor-pointer">
+                        <img src="IMG-20250626-WA0105.jpg" class="w-full h-32 object-cover" alt="Memory">
+                        <div class="handwritten text-center text-xs mt-3 font-bold text-slate-800">Campus Entry</div>
+                    </div>
+                </div>
+
+                <!-- Pic 8 -->
+                <div class="flex justify-center" style="--r: 2deg;" onclick="openLightbox('IMG-20250626-WA0096.jpg', 'The Sneeze Era Smile', 'A casual selfie recording genuine laughs when the ice was completely broken and jokes started following naturally again.')">
+                    <div class="polaroid cursor-pointer">
+                        <img src="IMG-20250626-WA0096.jpg" class="w-full h-32 object-cover" alt="Memory">
+                        <div class="handwritten text-center text-xs mt-3 font-bold text-slate-800">Hallway Smiles</div>
+                    </div>
+                </div>
+
+                <!-- Pic 9 -->
+                <div class="flex justify-center" style="--r: -3deg;" onclick="openLightbox('IMG-20250626-WA0098.jpg', 'Reunion Close Up', 'A beautifully framed selfie capturing deep relief and immediate comfort right after our multi-year reunion happened.')">
+                    <div class="polaroid cursor-pointer">
+                        <img src="IMG-20250626-WA0098.jpg" class="w-full h-32 object-cover" alt="Memory">
+                        <div class="handwritten text-center text-xs mt-3 font-bold text-slate-800">Reunion CloseUp</div>
+                    </div>
+                </div>
+
+                <!-- Pic 10 -->
+                <div class="flex justify-center" style="--r: 4deg;" onclick="openLightbox('IMG-20250626-WA0086.jpg', 'Burger King Feast', 'Sitting around a long shared fast food table chatting away for hours, eating burgers, and pretending like no time had passed.')">
+                    <div class="polaroid cursor-pointer">
+                        <img src="IMG-20250626-WA0086.jpg" class="w-full h-32 object-cover" alt="Memory">
+                        <div class="handwritten text-center text-xs mt-3 font-bold text-slate-800">Burger King Day</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- LIGHTBOX DETAILED MODAL ELEMENT COMPONENT -->
+        <div id="lightbox" class="fixed inset-0 bg-black/95 z-50 hidden opacity-0 transition-opacity duration-300 flex flex-col justify-center items-center p-4 backdrop-blur-md">
+            <button class="absolute top-6 right-6 text-white text-3xl hover:text-[#D4AF37] transition-colors cursor-pointer" onclick="closeLightbox()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="bg-white p-3 sm:p-4 rounded-lg shadow-2xl max-w-lg w-full text-slate-900 transform scale-95 transition-transform duration-300" id="lightbox-card">
+                <img id="lightbox-img" src="" class="w-full h-[55vh] object-cover rounded shadow" alt="Detailed view">
+                <h3 id="lightbox-title" class="handwritten text-2xl font-bold text-center mt-4 mb-1 text-slate-900"></h3>
+                <p id="lightbox-desc" class="text-xs sm:text-sm text-slate-600 font-light text-center px-4 leading-relaxed"></p>
+            </div>
+        </div>
+
+        <!-- SECTION 11: BIRTHDAY LETTER AS AN AUTHENTIC TEXTURED VINTAGE LAYOUT -->
+        <section class="py-16 border-t border-white/5 flex justify-center">
+            <div class="w-full max-w-2xl bg-[#FCF8F2] text-slate-800 p-8 sm:p-12 rounded-2xl shadow-2xl border-t-8 border-[#D4AF37] relative">
+                <!-- Watermark design decoration element asset -->
+                <div class="absolute bottom-6 right-8 text-6xl text-slate-200/40 font-serif pointer-events-none select-none cinzel-title">13</div>
+                
+                <h3 class="cinzel-title text-xl font-bold tracking-wide border-b border-slate-300 pb-3 mb-6 text-slate-900 uppercase text-center sm:text-left">
+                    A Letter To My Brother
+                </h3>
+                
+                <div class="handwritten text-lg sm:text-xl space-y-5 leading-relaxed font-semibold text-slate-800">
+                    <p>Happy Birthday Abhi.</p>
+                    <p>If I look back at my school life, almost every important memory has you somewhere in it. From sharing lunches, cycling after school, making jokes, fighting, reuniting, and growing up together, you've been part of every single chapter.</p>
+                    <p>Life took us on different paths for some time, but somehow our friendship never disappeared. You have supported me in ways I can never fully explain. You are not just a friend anymore. You are family.</p>
+                    <p>I hope we continue creating memories together for years, decades, and hopefully until the very end of our lives. Thank you for being there through everything.</p>
+                    <p class="pt-4 border-t border-slate-200">Happy 19th Birthday, brother.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 12: FINAL SURPRISE HIDDEN BUTTON & TRIGGER ENGINE -->
+        <section class="py-16 text-center border-t border-white/5">
+            <div class="space-y-6">
+                <p class="text-xs font-mono text-gray-500 uppercase tracking-widest">End of the chapter? Not quite.</p>
+                <h3 class="cinzel-title text-2xl text-white font-medium">One Final Seal of Brotherhood</h3>
+                
+                <div class="pt-4">
+                    <button id="surprise-cta-btn" class="px-8 py-4 bg-gradient-to-r from-[#D4AF37] via-[#F3E5AB] to-[#D4AF37] text-black font-mono font-bold text-sm tracking-widest rounded-full uppercase shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:shadow-[0_0_40px_rgba(212,175,55,0.6)] hover:scale-105 active:scale-95 transition-all cursor-pointer">
+                        <i class="fa-solid fa-envelope-open-text mr-2 animate-bounce"></i> One Last Message
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- HIDDEN SURPRISE MODAL COMPONENT WINDOW -->
+        <div id="surprise-modal" class="fixed inset-0 bg-black/95 z-50 hidden opacity-0 transition-opacity duration-300 flex justify-center items-center p-4 backdrop-blur-xl">
+            <div class="bg-gradient-to-br from-[#0A1128] to-black border-2 border-[#D4AF37] rounded-3xl p-6 sm:p-10 max-w-xl w-full text-center relative transform scale-95 transition-transform duration-300 shadow-[0_0_50px_rgba(212,175,55,0.25)]" id="surprise-card">
+                
+                <!-- Floating decorative celebratory crown asset background -->
+                <div class="text-[#D4AF37] text-5xl mb-4"><i class="fa-solid fa-crown"></i></div>
+                
+                <h2 class="cinzel-title text-2xl sm:text-3xl font-bold text-transparent bg-gradient-to-r from-[#D4AF37] via-[#F3E5AB] to-[#D4AF37] bg-clip-text mb-6 uppercase tracking-wider">
+                    To Eternal Bonds
+                </h2>
+                
+                <p class="text-base sm:text-lg text-white font-light leading-relaxed mb-4">
+                    "No matter where life takes us, you will always be one of the most important people in my story."
+                </p>
+                
+                <p class="text-xl font-bold font-mono text-[#D4AF37] tracking-wide mb-8">
+                    Happy Birthday, Brother.<br>Here's to 13 years of memories and a lifetime more to create.
+                </p>
+
+                <button class="px-6 py-2 bg-white/10 hover:bg-white/20 text-white font-mono text-xs tracking-widest uppercase rounded-full transition-colors cursor-pointer" onclick="closeSurpriseModal()">
+                    Close Message
+                </button>
+            </div>
+        </div>
+
+        <!-- RECENT LIVE FOOTER STYLING BRAND -->
+        <footer class="py-12 border-t border-white/5 text-center text-gray-500 space-y-2 relative">
+            <p class="cinzel-title text-sm tracking-widest text-[#D4AF37]/80">"Best friends are rare. Brothers by choice are even rarer."</p>
+            <p class="text-[10px] font-mono text-gray-600 uppercase tracking-widest pt-4">&copy; 2026 &bull; Crafted specifically for Abhi Nav Sai &bull; 13 Years & Counting</p>
+        </footer>
+
+    </main>
+
+    <!-- CUSTOM APP APPLICATION SCRIPTS LOGIC JAVASCRIPT LAYER -->
+    <script>
+        // TARGET DATES FOR ABHI NAV SAI COUNTDOWN GENERATOR SYSTEM
+        const birthDate = new Date("June 6, 2026 00:00:00").getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = birthDate - now;
+
+            if (distance < 0) {
+                document.getElementById("countdown-clock").innerHTML = `
+                    <div class="col-span-4 bg-gradient-to-r from-[#D4AF37]/20 to-transparent p-4 rounded-xl border border-[#D4AF37]/30 text-center">
+                        <span class="text-lg font-bold font-mono text-[#D4AF37] tracking-widest uppercase block animate-pulse">It's June 6! Happy Birthday Abhi!</span>
+                    </div>`;
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("cd-days").innerText = String(days).padStart(2, '0');
+            document.getElementById("cd-hours").innerText = String(hours).padStart(2, '0');
+            document.getElementById("cd-mins").innerText = String(minutes).padStart(2, '0');
+            document.getElementById("cd-secs").innerText = String(seconds).padStart(2, '0');
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // CANVAS BACKGROUND STARFIELD ANIMATION ENGINE LOGIC CODE
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            const count = Math.floor((canvas.width * canvas.height) / 8000);
+            for(let i=0; i<count; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.2,
+                    alpha: Math.random(),
+                    speed: 0.01 + Math.random() * 0.02
+                });
+            }
+        }
+
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(255, 255, 255, text)';
+            
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if(star.alpha > 1 || star.alpha < 0) star.speed = -star.speed;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0.1, star.alpha)})`;
+                ctx.fill();
+            });
+            requestAnimationFrame(animateStars);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        animateStars();
+
+        // LIGHTBOX PHOTO WINDOW EVENT CONTROLLERS
+        function openLightbox(src, title, desc) {
+            const lb = document.getElementById('lightbox');
+            const card = document.getElementById('lightbox-card');
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox-title').innerText = title;
+            document.getElementById('lightbox-desc').innerText = desc;
+
+            lb.classList.remove('hidden');
+            setTimeout(() => {
+                lb.classList.remove('opacity-0');
+                card.classList.remove('scale-95');
+            }, 50);
+        }
+
+        function closeLightbox() {
+            const lb = document.getElementById('lightbox');
+            const card = document.getElementById('lightbox-card');
+            lb.classList.add('opacity-0');
+            card.classList.add('scale-95');
+            setTimeout(() => {
+                lb.classList.add('hidden');
+            }, 300);
+        }
+
+        // SECTION 4: INTERACTIVE SNEEZE FUNCTION CORES
+        document.getElementById('sneeze-trigger-btn').addEventListener('click', function() {
+            const targetSection = document.getElementById('sneeze-section');
+            
+            // Trigger visual frame shake
+            targetSection.classList.add('shake-active', 'bg-green-950/20');
+            
+            // Web Audio sound burst fallback synth beep simulation sound
+            triggerSynthSneezeTone();
+
+            // Fire confetti explode pattern locally
+            confetti({
+                particleCount: 80,
+                spread: 60,
+                origin: { y: 0.6 },
+                colors: ['#4ade80', '#10b981', '#ffffff', '#D4AF37']
+            });
+
+            setTimeout(() => {
+                targetSection.classList.remove('shake-active');
+            }, 600);
+        });
+
+        // SECTION 12: SURPRISE CELEBRATION MODAL ENGINE
+        const surpriseBtn = document.getElementById('surprise-cta-btn');
+        const surpriseModal = document.getElementById('surprise-modal');
+        const surpriseCard = document.getElementById('surprise-card');
+
+        surpriseBtn.addEventListener('click', function() {
+            surpriseModal.classList.remove('hidden');
+            setTimeout(() => {
+                surpriseModal.classList.remove('opacity-0');
+                surpriseCard.classList.remove('scale-95');
+            }, 50);
+
+            // Endless firework rain confetti blasts
+            let end = Date.now() + (3 * 1000);
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#D4AF37', '#F3E5AB', '#ffffff']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#D4AF37', '#F3E5AB', '#ffffff']
+                });
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        });
+
+        function closeSurpriseModal() {
+            surpriseModal.classList.add('opacity-0');
+            surpriseCard.classList.add('scale-95');
+            setTimeout(() => {
+                surpriseModal.classList.add('hidden');
+            }, 300);
+        }
+
+        // WEB AUDIO API CINEMATIC PROCEDURAL SYNTH ENGINE BACKGROUND CAPABILITIES
+        let audioCtx = null;
+        let isPlaying = false;
+        let noteInterval = null;
+
+        const musicToggle = document.getElementById('bg-music-toggle');
+        const musicIcon = document.getElementById('music-icon');
+        const trackStatus = document.getElementById('track-status');
+
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function triggerSynthSneezeTone() {
+            if(!audioCtx) initAudio();
+            try {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+                osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.3);
+                
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } catch(e) {}
+        }
+
+        function playSoftMelodyNode(freq, startTime, duration) {
+            if (!audioCtx) return;
+            try {
+                let osc = audioCtx.createOscillator();
+                let gainNode = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, startTime);
+                
+                gainNode.gain.setValueAtTime(0.0, startTime);
+                gainNode.gain.linearRampToValueAtTime(0.06, startTime + 0.1); // Low soft background volume
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            } catch(e){}
+        }
+
+        // Soft ambient slow piano arpeggios pattern
+        const chords = [
+            [220.00, 261.63, 329.63, 392.00], // Am7
+            [196.00, 246.94, 293.66, 392.00], // G
+            [174.61, 220.00, 261.63, 349.23], // Fmaj7
+            [164.81, 196.00, 246.94, 329.63]  // Em
+        ];
+        let currentChordIdx = 0;
+        let noteStep = 0;
+
+        function startAmbientLoop() {
+            if(!audioCtx) initAudio();
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            noteInterval = setInterval(() => {
+                let now = audioCtx.currentTime;
+                let chord = chords[currentChordIdx];
+                let currentNoteFreq = chord[noteStep % chord.length];
+                
+                // Add minor octaves fluctuations for cinema style deep sound
+                if (noteStep % 4 === 0) currentNoteFreq = currentNoteFreq / 2;
+
+                playSoftMelodyNode(currentNoteFreq, now, 1.8);
+                
+                noteStep++;
+                if(noteStep % 8 === 0) {
+                    currentChordIdx = (currentChordIdx + 1) % chords.length;
+                }
+            }, 450);
+        }
+
+        function stopAmbientLoop() {
+            clearInterval(noteInterval);
+        }
+
+        musicToggle.addEventListener('click', () => {
+            if(!isPlaying) {
+                isPlaying = true;
+                musicIcon.className = "fa-solid fa-pause";
+                trackStatus.innerText = "Playing Ambient Piano";
+                trackStatus.classList.add('text-[#D4AF37]');
+                startAmbientLoop();
+            } else {
+                isPlaying = false;
+                musicIcon.className = "fa-solid fa-play";
+                trackStatus.innerText = "Sound Muted";
+                trackStatus.classList.remove('text-[#D4AF37]');
+                stopAmbientLoop();
+            }
+        });
+    </script>
+</body>
+</html>
+"""
+
+# Write the dynamic string content to a real download-ready index.html file element inside the environment
+output_path = "index.html"
+with open(output_path, "w", encoding="utf-8") as file:
+    file.write(html_content)
+
+print(f"File completely compiled at path: {os.path.abspath(output_path)}")
